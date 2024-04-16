@@ -6,7 +6,7 @@ const connectDB = require("./db/connect");
 const patientRouter = require("./routes/patient");
 
 app.get("/", (req, res) => {
-  res.send("HMS server is up...");
+  res.send("HMS server is up for the use...");
 });
 
 app.use(express.json());
