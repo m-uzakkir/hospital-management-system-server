@@ -1,10 +1,10 @@
-const bcrypt = require("bcrypt");
-const { Patient, User } = require("../models/User");
+const { Doctor, User } = require("../models/User");
 const { generateToken } = require("../services/token");
+const bcrypt = require("bcrypt");
 
-// Create a new patient
+// Create a new doctor
 
-const createPatient = async (req, res) => {
+const createDoctor = async (req, res) => {
   try {
     const { email, password, name } = req.body;
 
@@ -18,41 +18,41 @@ const createPatient = async (req, res) => {
       user = await User.create({
         email,
         hashedPassword,
-        role: "patient",
+        role: "doctor",
       });
     } else {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    const patient = await Patient.create({
+    const doctor = await Doctor.create({
       user: user._id,
       name,
     });
 
     const token = generateToken(
       {
-        id: patient._id,
+        id: doctor._id,
         role: user.role,
       },
       "1d"
     );
 
-    res.status(201).json({ patient, token });
+    res.status(201).json({ doctor, token });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-const getPatients = async (req, res) => {
+const getDoctors = async (req, res) => {
   try {
-    const patients = await Patient.find();
-    res.status(200).json(patients);
+    const doctors = await Doctor.find();
+    res.status(200).json(doctors);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
 module.exports = {
-  createPatient,
-  getPatients,
+  createDoctor,
+  getDoctors,
 };
