@@ -1,5 +1,5 @@
 const bcrypt = require("bcrypt");
-const { User } = require("../models/User");
+const { User, Doctor, Patient } = require("../models/User");
 const { generateToken } = require("../services/token");
 
 const login = async (req, res) => {
@@ -20,15 +20,52 @@ const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password!" });
     }
 
-    const token = generateToken(
-      {
-        id: user._id,
-        role: user.role,
-      },
-      "1d"
-    );
+    // check if user is a doctor or patient
 
-    res.status(200).json({ user, token });
+    let token = null;
+    let userData = null;
+
+    if (user.role === "doctor") {
+      // get the doctor details
+      const doctor = await Doctor.findOne({
+        user: user._id,
+      }).populate("user");
+
+      userData = doctor;
+
+      token = generateToken(
+        {
+          id: doctor._id,
+          role: user.role,
+        },
+        "1d"
+      );
+    } else if (user.role === "patient") {
+      // get the patient details
+      const patient = await Patient.findOne({
+        user: user._id,
+      }).populate("user");
+
+      userData = patient;
+
+      token = generateToken(
+        {
+          id: patient._id,
+          role: user.role,
+        },
+        "1d"
+      );
+    } else {
+      token = generateToken(
+        {
+          id: user._id,
+          role: user.role,
+        },
+        "1d"
+      );
+    }
+
+    res.status(200).json({ userData, token });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

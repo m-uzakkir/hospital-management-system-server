@@ -29,15 +29,7 @@ const createDoctor = async (req, res) => {
       name,
     });
 
-    const token = generateToken(
-      {
-        id: doctor._id,
-        role: user.role,
-      },
-      "1d"
-    );
-
-    res.status(201).json({ doctor, token });
+    res.status(201).json({ doctor });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -45,8 +37,37 @@ const createDoctor = async (req, res) => {
 
 const getDoctors = async (req, res) => {
   try {
-    const doctors = await Doctor.find();
+    const doctors = await Doctor.find().populate("user");
     res.status(200).json(doctors);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getDoctor = async (req, res) => {
+  try {
+    const doctor = await Doctor.findById(req.params.id).populate("user");
+    res.status(200).json(doctor);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const updateDoctor = async (req, res) => {
+  try {
+    const doctor = await Doctor.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+    res.status(200).json(doctor);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const deleteDoctor = async (req, res) => {
+  try {
+    await Doctor.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: "Doctor deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -55,4 +76,7 @@ const getDoctors = async (req, res) => {
 module.exports = {
   createDoctor,
   getDoctors,
+  getDoctor,
+  updateDoctor,
+  deleteDoctor,
 };

@@ -45,8 +45,37 @@ const createPatient = async (req, res) => {
 
 const getPatients = async (req, res) => {
   try {
-    const patients = await Patient.find();
+    const patients = await Patient.find().populate("user");
     res.status(200).json(patients);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getPatient = async (req, res) => {
+  try {
+    const patient = await Patient.findById(req.params.id).populate("user");
+    res.status(200).json(patient);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const updatePatient = async (req, res) => {
+  try {
+    const patient = await Patient.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+    res.status(200).json(patient);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const deletePatient = async (req, res) => {
+  try {
+    await Patient.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: "Patient deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -55,4 +84,7 @@ const getPatients = async (req, res) => {
 module.exports = {
   createPatient,
   getPatients,
+  getPatient,
+  updatePatient,
+  deletePatient,
 };

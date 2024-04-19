@@ -8,6 +8,7 @@ const doctorRouter = require("./routes/doctor");
 const authRouter = require("./routes/auth");
 
 const { User } = require("./models/User");
+const { hashedPassword } = require("./services/utils");
 
 app.get("/", (req, res) => {
   res.send("HMS server is up for the use...");
@@ -29,7 +30,7 @@ const start = async () => {
     if (!admin) {
       await User.create({
         email: "admin@admin.com",
-        hashedPassword: "admin",
+        hashedPassword: hashedPassword,
         role: "admin",
       });
     }
