@@ -8,10 +8,39 @@ const createAppointment = async (req, res) => {
   try {
     const { doctor, patient } = req.body;
 
+    const today = moment().startOf("day");
+    const pipeline = [
+      {
+        $match: {
+          doctor: new ObjectId(doctor),
+          date: {
+            $gte: today.toDate(),
+            $lt: moment(today).endOf("day").toDate(),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalAppointments: { $sum: 1 },
+        },
+      },
+    ];
+
+    const result = await Appointment.aggregate(pipeline);
+
+    const numberOfAppointments =
+      result.length > 0 ? result[0].totalAppointments : 0;
+
+    // the first ticket is at today, 3:00 PM and the interval is 15 minutes
+    const firstTicket = moment(today)
+      .add(15 * numberOfAppointments, "minutes")
+      .add(9, "hours");
+
     const appointment = await Appointment.create({
       doctor,
       patient,
-      date: Date.now(),
+      date: firstTicket.toDate(),
     });
 
     res.status(201).json({ appointment });
@@ -88,12 +117,10 @@ const getAvailableTicketsForDoctor = async (req, res) => {
     const result = await Appointment.aggregate(pipeline);
 
     if (result.length <= 0) {
-      res
-        .status(400)
-        .json({
-          message: "The doctor has no appointment today",
-          availableTickets: 20,
-        });
+      res.status(400).json({
+        message: "The doctor has no appointment today",
+        totalTickets,
+      });
       return;
     }
 
@@ -105,6 +132,22 @@ const getAvailableTicketsForDoctor = async (req, res) => {
   }
 };
 
+const getTodaysAppointments = async (req, res) => {
+  try {
+    const today = moment().startOf("day");
+    const appointments = await Appointment.find({
+      date: {
+        $gte: today.toDate(),
+        $lt: moment(today).endOf("day").toDate(),
+      },
+    })
+      .populate("doctor")
+      .populate("patient");
+
+    res.status(200).json(appointments);
+  } catch (error) {}
+};
+
 module.exports = {
   createAppointment,
   getAppointments,
@@ -112,4 +155,5 @@ module.exports = {
   updateAppointment,
   deleteAppointment,
   getAvailableTicketsForDoctor,
+  getTodaysAppointments,
 };
