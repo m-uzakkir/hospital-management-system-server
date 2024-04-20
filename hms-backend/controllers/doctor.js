@@ -1,3 +1,4 @@
+const { Team } = require("../models/Team");
 const { Doctor, User } = require("../models/User");
 const { generateToken } = require("../services/token");
 const bcrypt = require("bcrypt");
@@ -5,12 +6,13 @@ const bcrypt = require("bcrypt");
 // Create a new doctor
 
 const createDoctor = async (req, res) => {
+  let user;
   try {
-    const { email, password, name } = req.body;
+    const { email, password, name, ...payload } = req.body;
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    let user = await User.findOne({
+    user = await User.findOne({
       email,
     });
 
@@ -27,10 +29,25 @@ const createDoctor = async (req, res) => {
     const doctor = await Doctor.create({
       user: user._id,
       name,
+      ...payload,
     });
+
+    if (doctor.team) {
+      const updateTeam = await Team.findByIdAndUpdate(doctor.team, {
+        $push: { doctors: doctor._id },
+      });
+
+      if (!updateTeam) {
+        return res.status(400).json({ message: "Team does not exist" });
+      }
+    }
 
     res.status(201).json({ doctor });
   } catch (error) {
+    if (user) {
+      await User.findByIdAndDelete(user._id);
+    }
+
     res.status(500).json({ error: error.message });
   }
 };
@@ -58,6 +75,17 @@ const updateDoctor = async (req, res) => {
     const doctor = await Doctor.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
+
+    if (doctor.team) {
+      const updateTeam = await Team.findByIdAndUpdate(doctor.team, {
+        $push: { doctors: doctor._id },
+      });
+
+      if (!updateTeam) {
+        return res.status(400).json({ message: "Team does not exist" });
+      }
+    }
+
     res.status(200).json(doctor);
   } catch (error) {
     res.status(500).json({ error: error.message });

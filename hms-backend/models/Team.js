@@ -8,10 +8,10 @@ const TeamSchema = new mongoose.Schema({
   description: {
     type: String,
   },
-  members: [
+  doctors: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Doctor",
     },
   ],
 });

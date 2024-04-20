@@ -99,6 +99,10 @@ const DoctorSchema = new mongoose.Schema({
     // required: true,
   },
 
+  mobileNo: {
+    type: String,
+  },
+
   fatherName: {
     type: String,
   },
