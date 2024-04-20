@@ -8,6 +8,7 @@ const doctorRouter = require("./routes/doctor");
 const authRouter = require("./routes/auth");
 const teamRouter = require("./routes/team");
 const departmentRouter = require("./routes/department");
+const appointmentRouter = require("./routes/appointment");
 
 const { User } = require("./models/User");
 const { hashedPassword } = require("./services/utils");
@@ -23,6 +24,7 @@ app.use("/api/patients", patientRouter);
 app.use("/api/doctors", doctorRouter);
 app.use("/api/teams", teamRouter);
 app.use("/api/departments", departmentRouter);
+app.use("/api/appointments", appointmentRouter);
 app.use("/api/auth", authRouter);
 
 const start = async () => {

@@ -2,4 +2,6 @@ const bcrypt = require("bcrypt");
 
 const hashedPassword = bcrypt.hashSync("admin", 12);
 
-module.exports = { hashedPassword };
+const totalTickets = 20;
+
+module.exports = { hashedPassword, totalTickets };
