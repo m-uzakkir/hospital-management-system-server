@@ -12,6 +12,7 @@ const appointmentRouter = require("./routes/appointment");
 
 const { User } = require("./models/User");
 const { hashedPassword } = require("./services/utils");
+const authenticationMiddleware = require("./middlewares/auth");
 
 app.get("/", (req, res) => {
   res.send("HMS server is up for the use...");
@@ -26,6 +27,13 @@ app.use("/api/teams", teamRouter);
 app.use("/api/departments", departmentRouter);
 app.use("/api/appointments", appointmentRouter);
 app.use("/api/auth", authRouter);
+
+// app.use("/api/patients", authenticationMiddleware, patientRouter);
+// app.use("/api/doctors", authenticationMiddleware, doctorRouter);
+// app.use("/api/teams", authenticationMiddleware, teamRouter);
+// app.use("/api/departments", authenticationMiddleware, departmentRouter);
+// app.use("/api/appointments", authenticationMiddleware, appointmentRouter);
+// app.use("/api/auth", authRouter);
 
 const start = async () => {
   try {

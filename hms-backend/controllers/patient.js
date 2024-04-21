@@ -6,7 +6,7 @@ const { generateToken } = require("../services/token");
 
 const createPatient = async (req, res) => {
   try {
-    const { email, password, name } = req.body;
+    const { email, password, ...payload } = req.body;
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
@@ -26,7 +26,7 @@ const createPatient = async (req, res) => {
 
     const patient = await Patient.create({
       user: user._id,
-      name,
+      ...payload,
     });
 
     const token = generateToken(
@@ -81,10 +81,22 @@ const deletePatient = async (req, res) => {
   }
 };
 
+const getPatientByWardNo = async (req, res) => {
+  try {
+    const patient = await Patient.findOne({
+      wardNo: req.params.wardNo,
+    }).populate("user");
+    res.status(200).json(patient);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   createPatient,
   getPatients,
   getPatient,
   updatePatient,
   deletePatient,
+  getPatientByWardNo,
 };

@@ -10,8 +10,10 @@ const {
   deleteTeam,
   addDoctorToTheTeam,
   removeDoctorFromTeam,
+  getPatientsByTeam,
 } = require("../controllers/team");
 
+router.route("/patients/:id").get(getPatientsByTeam);
 router.route("/").post(createTeam).get(getTeams);
 router
   .route("/:id")

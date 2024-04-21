@@ -2,6 +2,7 @@ const moment = require("moment");
 const mongoose = require("mongoose");
 const { Appointment } = require("../models/Appointment");
 const { totalTickets } = require("../services/utils");
+const { Doctor } = require("../models/User");
 const { ObjectId } = require("mongoose").Types;
 
 const createAppointment = async (req, res) => {
@@ -148,6 +149,26 @@ const getTodaysAppointments = async (req, res) => {
   } catch (error) {}
 };
 
+// list of doctors who have treated a given patient
+const getDoctorsByPatient = async (req, res) => {
+  try {
+    const patientId = req.params.id;
+
+    const appointments = await Appointment.find({ patient: patientId });
+
+    const doctors = await Promise.all(
+      appointments.map(async (appointment) => {
+        const doctor = await Doctor.findById(appointment.doctor);
+        return doctor;
+      })
+    );
+
+    res.status(200).json(doctors);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   createAppointment,
   getAppointments,
@@ -156,4 +177,5 @@ module.exports = {
   deleteAppointment,
   getAvailableTicketsForDoctor,
   getTodaysAppointments,
+  getDoctorsByPatient,
 };

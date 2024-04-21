@@ -1,3 +1,4 @@
+const { Appointment } = require("../models/Appointment");
 const { Team } = require("../models/Team");
 const { Doctor } = require("../models/User");
 
@@ -113,6 +114,33 @@ const removeDoctorFromTeam = async (req, res) => {
   }
 };
 
+// list of patients treated by a team
+
+const getPatientsByTeam = async (req, res) => {
+  try {
+    const team = await Team.findById(req.params.id);
+
+    // const patients = [];
+
+    const doctors = await Promise.all(
+      team.doctors.map(async (doctorId) => {
+        return doctorId;
+      })
+    );
+
+    const patients = await Appointment.find({
+      doctor: { $in: doctors },
+    }).populate({
+      path: "patient",
+      select: "name wardNo",
+    });
+
+    res.status(200).json(patients);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   createTeam,
   getTeams,
@@ -121,4 +149,5 @@ module.exports = {
   deleteTeam,
   addDoctorToTheTeam,
   removeDoctorFromTeam,
+  getPatientsByTeam,
 };

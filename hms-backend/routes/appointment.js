@@ -7,9 +7,12 @@ const {
   deleteAppointment,
   getAvailableTicketsForDoctor,
   getTodaysAppointments,
+  getDoctorsByPatient,
 } = require("../controllers/appointment");
 
 const router = express.Router();
+
+router.route("/doctors/:id").get(getDoctorsByPatient);
 
 router
   .route("/get-available-tickets/:doctorId")
